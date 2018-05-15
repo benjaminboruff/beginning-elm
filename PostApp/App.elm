@@ -1,16 +1,16 @@
 module App exposing (main)
 
-import State exposing (init, update)
+import State exposing (init, updateWithStorage)
 import View exposing (view)
 import Types exposing (..)
 import Navigation
 
 
-main : Program Never Model Msg
+main : Program (Maybe (List Post)) Model Msg
 main =
-    Navigation.program LocationChanged
+    Navigation.programWithFlags LocationChanged
         { init = init
         , view = view
-        , update = update
+        , update = updateWithStorage
         , subscriptions = \_ -> Sub.none
         }
