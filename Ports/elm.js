@@ -7910,30 +7910,171 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
-var _user$project$PortExamples$init = {ctor: '_Tuple2', _0: '', _1: _elm_lang$core$Platform_Cmd$none};
+var _user$project$PortExamples$viewDataFromJs = function (data) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$h3,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('Received the following data from JavaScript'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(data),
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _user$project$PortExamples$viewError = function (errorMessage) {
+	var errorHeading = 'Countn\'t receive data from JavaScript';
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$h3,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(errorHeading),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(
+					A2(_elm_lang$core$Basics_ops['++'], 'Error: ', errorMessage)),
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _user$project$PortExamples$viewDataFromJsOrError = function (model) {
+	var _p0 = model.errorMessage;
+	if (_p0.ctor === 'Just') {
+		return _user$project$PortExamples$viewError(_p0._0);
+	} else {
+		return _user$project$PortExamples$viewDataFromJs(model.dataFromJs);
+	}
+};
 var _user$project$PortExamples$sendData = _elm_lang$core$Native_Platform.outgoingPort(
 	'sendData',
 	function (v) {
-		return v;
+		return {
+			posts: _elm_lang$core$Native_List.toArray(v.posts).map(
+				function (v) {
+					return {
+						id: v.id,
+						title: v.title,
+						author: {name: v.author.name, url: v.author.url}
+					};
+				}),
+			comments: _elm_lang$core$Native_List.toArray(v.comments).map(
+				function (v) {
+					return {id: v.id, body: v.body, postId: v.postId};
+				}),
+			profile: {name: v.profile.name}
+		};
 	});
 var _user$project$PortExamples$update = F2(
 	function (msg, model) {
-		var _p0 = msg;
-		if (_p0.ctor === 'SendDataToJs') {
+		var _p1 = msg;
+		if (_p1.ctor === 'SendDataToJs') {
 			return {
 				ctor: '_Tuple2',
 				_0: model,
-				_1: _user$project$PortExamples$sendData('Hello JavaScript!')
+				_1: _user$project$PortExamples$sendData(model.dataToJs)
 			};
 		} else {
-			return {ctor: '_Tuple2', _0: _p0._0, _1: _elm_lang$core$Platform_Cmd$none};
+			var _p2 = A2(_elm_lang$core$Json_Decode$decodeValue, _elm_lang$core$Json_Decode$string, _p1._0);
+			if (_p2.ctor === 'Ok') {
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{dataFromJs: _p2._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			} else {
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							errorMessage: _elm_lang$core$Maybe$Just(_p2._0)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			}
 		}
 	});
-var _user$project$PortExamples$receiveData = _elm_lang$core$Native_Platform.incomingPort('receiveData', _elm_lang$core$Json_Decode$string);
+var _user$project$PortExamples$receiveData = _elm_lang$core$Native_Platform.incomingPort('receiveData', _elm_lang$core$Json_Decode$value);
+var _user$project$PortExamples$ComplexData = F3(
+	function (a, b, c) {
+		return {posts: a, comments: b, profile: c};
+	});
+var _user$project$PortExamples$Post = F3(
+	function (a, b, c) {
+		return {id: a, title: b, author: c};
+	});
+var _user$project$PortExamples$Author = F2(
+	function (a, b) {
+		return {name: a, url: b};
+	});
+var _user$project$PortExamples$Comment = F3(
+	function (a, b, c) {
+		return {id: a, body: b, postId: c};
+	});
+var _user$project$PortExamples$complexData = function () {
+	var post2 = A3(
+		_user$project$PortExamples$Post,
+		2,
+		'http-server',
+		A2(_user$project$PortExamples$Author, 'indexzero', 'https://github.com/indexzero'));
+	var post1 = A3(
+		_user$project$PortExamples$Post,
+		1,
+		'json-server',
+		A2(_user$project$PortExamples$Author, 'typicode', 'https://github.com/typicode'));
+	return {
+		posts: {
+			ctor: '::',
+			_0: post1,
+			_1: {
+				ctor: '::',
+				_0: post2,
+				_1: {ctor: '[]'}
+			}
+		},
+		comments: {
+			ctor: '::',
+			_0: A3(_user$project$PortExamples$Comment, 1, 'some comment', 1),
+			_1: {ctor: '[]'}
+		},
+		profile: {name: 'typicode'}
+	};
+}();
+var _user$project$PortExamples$init = {
+	ctor: '_Tuple2',
+	_0: {dataFromJs: '', dataToJs: _user$project$PortExamples$complexData, errorMessage: _elm_lang$core$Maybe$Nothing},
+	_1: _elm_lang$core$Platform_Cmd$none
+};
+var _user$project$PortExamples$Profile = function (a) {
+	return {name: a};
+};
+var _user$project$PortExamples$Model = F3(
+	function (a, b, c) {
+		return {dataFromJs: a, dataToJs: b, errorMessage: c};
+	});
 var _user$project$PortExamples$ReceivedDataFromJs = function (a) {
 	return {ctor: 'ReceivedDataFromJs', _0: a};
 };
-var _user$project$PortExamples$subscriptions = function (_p1) {
+var _user$project$PortExamples$subscriptions = function (_p3) {
 	return _user$project$PortExamples$receiveData(_user$project$PortExamples$ReceivedDataFromJs);
 };
 var _user$project$PortExamples$SendDataToJs = {ctor: 'SendDataToJs'};
@@ -7969,8 +8110,7 @@ var _user$project$PortExamples$view = function (model) {
 						{ctor: '[]'}),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(
-							A2(_elm_lang$core$Basics_ops['++'], 'Data received from JavaScript: ', model)),
+						_0: _user$project$PortExamples$viewDataFromJsOrError(model),
 						_1: {ctor: '[]'}
 					}
 				}
